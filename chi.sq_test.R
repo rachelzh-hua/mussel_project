@@ -72,11 +72,13 @@ for(j in 1:length(SNP_list)){
 data_23B_chisq <- data.frame(
   SNP_rownames = integer(length = nrow(data_23B)),
   X.CHROM = character(length = nrow(data_23B)),
+  POS=integer(length = nrow(data_23B)),
   p.values = integer(length = nrow(data_23B))
 )
 
 data_23B_chisq$SNP_rownames <- rownames(data_23B)
 data_23B_chisq$X.CHROM <- data_23B$X.CHROM
+data_23B_chisq$POS <- data_23B$POS
 data_23B_chisq$p.values <- pvals
 
 #data_23B_chisq$p.adjust.BH <- p.adjust(p=data_23B_chisq$p.values, method='BH')
@@ -137,22 +139,31 @@ data_23SM_chisq$p.values <- pvals_SM
 #common_bonferroni_table <- na.omit(common_bonferroni_table)
 #length(which(common_bonferroni_table$p.adjust.bonferroni <= 0.05))  
 
-data_23B_pval <- data_23B_chisq[data_23B_chisq$p.values < 0.05, ]
-data_23SM_pval <- data_23SM_chisq[data_23SM_chisq$p.values < 0.05, ]
-common_pval <- intersect(rownames(data_23B_pval), rownames(data_23SM_pval)) 
-common_pval_table <- data_23SM_pval[common_pval,]
+data_23B_pval <- data_23B_chisq[data_23B_chisq$p.values < 0.05/nrow(data), ]
+data_23SM_pval <- data_23SM_chisq[data_23SM_chisq$p.values < 0.05/nrow(data), ]
+common <- intersect(data_23B_pval$SNP_rownames, data_23SM_pval$SNP_rownames) 
+common_pval <- data[common,]
 
 #chi.sq_table[ROW_TO_ADD+3, 'replicate'] <- population[1]
 #chi.sq_table[ROW_TO_ADD+3, 'number_of_markers'] <- length(common_pval)
 #chi.sq_table[ROW_TO_ADD+3, 'total_number_het_markers'] <- nrow(data)
 #chi.sq_table[ROW_TO_ADD+3, 'D0_D23B'] <- length(which(data_23B_chisq$p.values < 0.05))
 #chi.sq_table[ROW_TO_ADD+3, 'D0_D23SM'] <- length(which(data_23SM_chisq$p.values < 0.05))
-chi.sq_table[nrow(chi.sq_table)+1,] <- c(population[7], length(common_pval),
+chi.sq_table[nrow(chi.sq_table)+1,] <- c(population[7], 
+                                        nrow(common_pval),
                                         nrow(data), 
-                                        length(which(data_23B_chisq$p.values < 0.05)),
-                                        length(which(data_23SM_chisq$p.values < 0.05)))
+                                        nrow(data_23B_pval),
+                                        nrow(data_23SM_pval))
 
 
+OUT <- loadWorkbook('~/Documents/NuzhdinLab/mussel_project/analysis/chisq.test/chi.sq_significant_markers.xlsx')
+addWorksheet(OUT, paste(population[7],'significant_markers', sep='_'))
+writeData(OUT, 
+          paste(population[7],'significant_markers', sep='_'),
+          common_pval)
+saveWorkbook(OUT, 
+             '~/Documents/NuzhdinLab/mussel_project/analysis/chisq.test/chi.sq_significant_markers.xlsx',
+             overwrite=T)
 
 
 
@@ -198,7 +209,7 @@ for(j in 1:length(SNP_list)){
   pvals <- c(pvals,chisq.result$p.value)
 }
 
-pvals_distribution <- hist(pvals, breaks=20)
+#pvals_distribution <- hist(pvals, breaks=20)
 
 data_23B_chisq <- data.frame(
   SNP_rownames = integer(length = nrow(data_23B)),
@@ -220,15 +231,36 @@ data_23B_chisq$p.values <- pvals
 #data_23B_bonferroni <- data_23B_chisq[data_23B_chisq$p.adjust.bonferroni <= 0.05, ] 
 #data_23B_bonferroni <- na.omit(data_23B_bonferroni) #4342
 
+data_23B_pval <- data_23B_chisq[data_23B_chisq$p.values < 0.05, ]
 chi.sq_table[nrow(chi.sq_table)+1,] <- c(population[8], 
-                                         length(which(data_23B_chisq$p.values < 0.05)),
+                                         nrow(data_23B_pval),
                                          nrow(data), 
-                                         length(which(data_23B_chisq$p.values < 0.05)),
+                                         nrow(data_23B_pval),
                                          NA
                                          )
 
+common_pval <- data[data_23B_pval$SNP_rownames, ]
+
+write.xlsx(common_pval, 
+           file='~/Documents/NuzhdinLab/mussel_project/analysis/chisq.test/chi.sq_significant_markers.xlsx',
+           sheetName = paste(population[8],'significant_markers', sep='_'), append=TRUE
+)
+
+
+addWorksheet(OUT, paste(population[8],'significant_markers', sep='_'))
+writeData(OUT, 
+          paste(population[8],'significant_markers', sep='_'),
+          common_pval)
+saveWorkbook(OUT, 
+             '~/Documents/NuzhdinLab/mussel_project/analysis/chisq.test/chi.sq_significant_markers.xlsx',
+             overwrite=T)
+
+
+
+
+
 write.table(x=chi.sq_table, 
-            file='~/Documents/NuzhdinLab/mussel_project/analysis/chisq.test/chi.sq_table_p.values.txt', 
+            file='~/Documents/NuzhdinLab/mussel_project/analysis/chisq.test/chi.sq_table_p.values_over_total.txt', 
             quote=FALSE, row.names=TRUE, sep='\t')
 
 
