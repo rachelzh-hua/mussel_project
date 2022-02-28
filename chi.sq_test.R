@@ -143,28 +143,31 @@ data_23B_pval <- data_23B_chisq[data_23B_chisq$p.values < 0.05/nrow(data), ]
 data_23SM_pval <- data_23SM_chisq[data_23SM_chisq$p.values < 0.05/nrow(data), ]
 common <- intersect(data_23B_pval$SNP_rownames, data_23SM_pval$SNP_rownames) 
 common_pval <- data[common,]
+p.value <- data_23SM_pval[data_23SM_pval$SNP_rownames %in% common, ]
+common_pval$p.value <- p.value$p.values
 
 #chi.sq_table[ROW_TO_ADD+3, 'replicate'] <- population[1]
 #chi.sq_table[ROW_TO_ADD+3, 'number_of_markers'] <- length(common_pval)
 #chi.sq_table[ROW_TO_ADD+3, 'total_number_het_markers'] <- nrow(data)
 #chi.sq_table[ROW_TO_ADD+3, 'D0_D23B'] <- length(which(data_23B_chisq$p.values < 0.05))
 #chi.sq_table[ROW_TO_ADD+3, 'D0_D23SM'] <- length(which(data_23SM_chisq$p.values < 0.05))
-chi.sq_table[nrow(chi.sq_table)+1,] <- c(population[7], 
+chi.sq_table[nrow(chi.sq_table)+1,] <- c(population[5], 
                                         nrow(common_pval),
                                         nrow(data), 
-                                        nrow(data_23B_pval),
-                                        nrow(data_23SM_pval))
+ 
+                                    nrow(data_23B_pval),
+                                    nrow(data_23SM_pval))
 
 
-OUT <- loadWorkbook('~/Documents/NuzhdinLab/mussel_project/analysis/chisq.test/chi.sq_significant_markers.xlsx')
+#library(openxlsx)
+#OUT <- createWorkbook()
 addWorksheet(OUT, paste(population[7],'significant_markers', sep='_'))
 writeData(OUT, 
           paste(population[7],'significant_markers', sep='_'),
           common_pval)
 saveWorkbook(OUT, 
-             '~/Documents/NuzhdinLab/mussel_project/analysis/chisq.test/chi.sq_significant_markers.xlsx',
+             '~/Documents/NuzhdinLab/mussel_project/analysis/chisq.test/chi.sq_significant_markers_with_pval.xlsx',
              overwrite=T)
-
 
 
 
@@ -231,7 +234,7 @@ data_23B_chisq$p.values <- pvals
 #data_23B_bonferroni <- data_23B_chisq[data_23B_chisq$p.adjust.bonferroni <= 0.05, ] 
 #data_23B_bonferroni <- na.omit(data_23B_bonferroni) #4342
 
-data_23B_pval <- data_23B_chisq[data_23B_chisq$p.values < 0.05, ]
+data_23B_pval <- data_23B_chisq[data_23B_chisq$p.values < 0.05/nrow(data_23B), ]
 chi.sq_table[nrow(chi.sq_table)+1,] <- c(population[8], 
                                          nrow(data_23B_pval),
                                          nrow(data), 
@@ -240,11 +243,7 @@ chi.sq_table[nrow(chi.sq_table)+1,] <- c(population[8],
                                          )
 
 common_pval <- data[data_23B_pval$SNP_rownames, ]
-
-write.xlsx(common_pval, 
-           file='~/Documents/NuzhdinLab/mussel_project/analysis/chisq.test/chi.sq_significant_markers.xlsx',
-           sheetName = paste(population[8],'significant_markers', sep='_'), append=TRUE
-)
+common_pval$p.value <- data_23B_pval$p.values
 
 
 addWorksheet(OUT, paste(population[8],'significant_markers', sep='_'))
@@ -252,7 +251,7 @@ writeData(OUT,
           paste(population[8],'significant_markers', sep='_'),
           common_pval)
 saveWorkbook(OUT, 
-             '~/Documents/NuzhdinLab/mussel_project/analysis/chisq.test/chi.sq_significant_markers.xlsx',
+             '~/Documents/NuzhdinLab/mussel_project/analysis/chisq.test/chi.sq_significant_markers_with_pval.xlsx',
              overwrite=T)
 
 
