@@ -1,4 +1,4 @@
-setwd("~/Documents/NuzhdinLab/mussel_project/analysis")
+setwd("~/path/to/directory")
 
 filenames <- list.files(path='counts/', full.names = TRUE)
 results <- strsplit(x=filenames, split='//', fixed=TRUE)
@@ -242,7 +242,7 @@ chi.sq_table[nrow(chi.sq_table)+1,] <- c(population[8],
 common_pval <- data[data_23B_pval$SNP_rownames, ]
 
 write.xlsx(common_pval, 
-           file='~/Documents/NuzhdinLab/mussel_project/analysis/chisq.test/chi.sq_significant_markers.xlsx',
+           file='~/path/to/chisq.test/chi.sq_significant_markers.xlsx',
            sheetName = paste(population[8],'significant_markers', sep='_'), append=TRUE
 )
 
@@ -252,7 +252,7 @@ writeData(OUT,
           paste(population[8],'significant_markers', sep='_'),
           common_pval)
 saveWorkbook(OUT, 
-             '~/Documents/NuzhdinLab/mussel_project/analysis/chisq.test/chi.sq_significant_markers.xlsx',
+             '~/path/to/chisq.test/chi.sq_significant_markers.xlsx',
              overwrite=T)
 
 
@@ -260,7 +260,7 @@ saveWorkbook(OUT,
 
 
 write.table(x=chi.sq_table, 
-            file='~/Documents/NuzhdinLab/mussel_project/analysis/chisq.test/chi.sq_table_p.values_over_total.txt', 
+            file='~/path/to/chisq.test/chi.sq_table_p.values_over_total.txt', 
             quote=FALSE, row.names=TRUE, sep='\t')
 
 
